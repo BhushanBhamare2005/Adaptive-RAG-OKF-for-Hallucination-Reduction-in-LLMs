@@ -19,8 +19,8 @@ export default function Settings() {
     api_key: string;
     model: string;
   }>({
-    provider: 'ollama',
-    base_url: 'http://127.0.0.1:11434',
+    provider: 'openai_compatible',
+    base_url: '',
     api_key: '',
     model: '',
   });
@@ -28,8 +28,8 @@ export default function Settings() {
   useEffect(() => {
     getRiskSettings().then(setSettings).catch((e) => setError(e?.response?.data?.detail || 'Settings unavailable.'));
     getProviderConfig().then((data) => setProvider({
-      provider: data.provider || 'ollama',
-      base_url: data.base_url || 'http://127.0.0.1:11434',
+      provider: data.provider || 'openai_compatible',
+      base_url: data.base_url || '',
       api_key: '',
       model: data.model || '',
     })).catch(() => undefined);
@@ -60,7 +60,7 @@ export default function Settings() {
     }
   }
   return <div>
-    <PageHeader eyebrow="Platform configuration" title="Settings and Model Configuration" description="Configure adaptive thresholds and verification loop limits." />
+    <PageHeader eyebrow="Platform configuration" title="Settings and Model Configuration" description="Configure adaptive thresholds, verification loops, and a publicly reachable LLM provider." />
     {message && <div className="alert success">{message}</div>}{error && <div className="alert error">{error}</div>}
     <section className="panel settings-panel"><div className="panel-header"><div><span className="eyebrow">LLM provider</span><h2>Generation configuration</h2></div></div>
       <div className="provider-status">
@@ -73,11 +73,8 @@ export default function Settings() {
         <select value={provider.provider} onChange={(e) => setProvider((current) => ({
           ...current,
           provider: e.target.value as 'openai_compatible' | 'ollama',
-          base_url: e.target.value === 'ollama'
-            ? 'http://127.0.0.1:11434'
-            : current.base_url,
         }))}>
-          <option value="ollama">Ollama (local)</option>
+          <option value="ollama">Ollama (public endpoint)</option>
           <option value="openai_compatible">OpenAI-compatible API</option>
         </select>
       </label>
@@ -85,14 +82,14 @@ export default function Settings() {
         <input
           value={provider.base_url}
           onChange={(e) => setProvider((current) => ({ ...current, base_url: e.target.value }))}
-          placeholder={provider.provider === 'ollama' ? 'http://127.0.0.1:11434' : 'https://api.openai.com/v1'}
+          placeholder={provider.provider === 'ollama' ? 'https://your-public-ollama-host:11434' : 'https://api.openai.com/v1'}
         />
       </label>
       <label className="field-label">Model
         <input
           value={provider.model}
           onChange={(e) => setProvider((current) => ({ ...current, model: e.target.value }))}
-          placeholder={provider.provider === 'ollama' ? 'llama3.1' : 'gpt-4o-mini'}
+          placeholder={provider.provider === 'ollama' ? 'qwen2.5:0.5b' : 'gpt-4o-mini'}
         />
       </label>
       {provider.provider === 'openai_compatible' && (

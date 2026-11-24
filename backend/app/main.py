@@ -7,6 +7,7 @@ from app.api.routes import adaptive_okf, explainability
 from app.core.logging import setup_logging
 from app.core.config import settings as app_settings
 from app.db.database import init_db
+from app.services.file_storage import ensure_storage_bucket
 
 setup_logging()
 
@@ -24,6 +25,7 @@ app.add_middleware(
 @app.on_event("startup")
 def startup() -> None:
     init_db()
+    ensure_storage_bucket()
     from app.db.database import SessionLocal
     from app.db.models import Setting
     from app.rag.providers import configure_llm_provider
@@ -41,7 +43,8 @@ def startup() -> None:
         db.close()
 
 
-init_db()
+if app_settings.database_url.startswith("sqlite"):
+    init_db()
 
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(datasets.router, prefix="/api/datasets", tags=["datasets"])

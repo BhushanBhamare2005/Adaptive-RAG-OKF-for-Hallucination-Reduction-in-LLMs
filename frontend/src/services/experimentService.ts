@@ -18,7 +18,7 @@ export async function getHealth(): Promise<HealthStatus> {
 }
 
 export async function getDatasetSummary(): Promise<DatasetSummary> {
-  const { data } = await api.get<DatasetSummary>('/datasets/');
+  const { data } = await api.get<DatasetSummary>('/datasets');
   return data;
 }
 

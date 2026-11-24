@@ -16,6 +16,7 @@ from app.core.config import settings
 from app.db.database import get_db
 from app.db.models import Document, AuditEvent
 from app.services.knowledge_service import list_documents, process_document, process_document_by_id
+from app.services.file_storage import delete_document as delete_stored_document, store_document
 from app.api.schemas.modern import URLIngestRequest
 
 router = APIRouter()
@@ -43,7 +44,8 @@ def normalize_public_url(url: str) -> str:
     return value
 
 
-@router.get("/")
+@router.get("/", include_in_schema=False)
+@router.get("")
 def get_documents(db: Session = Depends(get_db)):
     return {"documents": list_documents(db), "total": len(list_documents(db))}
 
@@ -69,18 +71,19 @@ async def upload_document(
     suffix = Path(file.filename or "").suffix.lower()
     if suffix not in ALLOWED:
         raise HTTPException(status_code=422, detail=f"Unsupported file type: {suffix or 'unknown'}")
-    data = await file.read(settings.document_max_size_mb * 1024 * 1024)
+    max_size = settings.document_max_size_mb * 1024 * 1024
+    data = await file.read(max_size + 1)
     if not data:
         raise HTTPException(status_code=422, detail="Uploaded file is empty.")
+    if len(data) > max_size:
+        raise HTTPException(status_code=413, detail=f"Documents must be smaller than {settings.document_max_size_mb} MB.")
     digest = hashlib.sha256(data).hexdigest()
     duplicate = db.execute(select(Document).where(Document.content_hash == digest)).scalar_one_or_none()
     if duplicate:
         return {"document_id": duplicate.id, "duplicate": True, "status": duplicate.status}
 
     safe_name = Path(file.filename or "document").name
-    settings.upload_dir.mkdir(parents=True, exist_ok=True)
-    storage_path = settings.upload_dir / f"{digest}{suffix}"
-    storage_path.write_bytes(data)
+    storage_path = store_document(f"{digest}{suffix}", data, ALLOWED[suffix])
     document = Document(
         title=Path(safe_name).stem,
         original_filename=safe_name,
@@ -197,9 +200,7 @@ async def ingest_url(payload: URLIngestRequest, db: Session = Depends(get_db)):
             "duplicate": True,
             "error_message": duplicate.error_message,
         }
-    settings.upload_dir.mkdir(parents=True, exist_ok=True)
-    storage_path = settings.upload_dir / f"{digest}.txt"
-    storage_path.write_text(downloaded, encoding="utf-8")
+    storage_path = store_document(f"{digest}.txt", data, "text/plain")
     document = Document(
         title=payload.title.strip() or urlparse(final_url).netloc,
         original_filename=urlparse(final_url).path.rsplit("/", 1)[-1] or "website.txt",
@@ -272,7 +273,7 @@ def delete_document(document_id: str, db: Session = Depends(get_db)):
     if not document:
         raise HTTPException(status_code=404, detail="Document not found.")
     if document.storage_path:
-        Path(document.storage_path).unlink(missing_ok=True)
+        delete_stored_document(document.storage_path)
     db.delete(document)
     db.commit()
     return {"status": "deleted", "document_id": document_id}

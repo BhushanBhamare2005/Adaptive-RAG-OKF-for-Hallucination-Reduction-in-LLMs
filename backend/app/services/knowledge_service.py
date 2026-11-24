@@ -1,6 +1,4 @@
 import hashlib
-from pathlib import Path
-
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -10,6 +8,7 @@ from app.rag.chunker import chunk_sections
 from app.rag.document_processor import extract_text
 from app.rag.embeddings import embedding_provider
 from app.rag.vector_store import get_collection
+from app.services.file_storage import read_document
 
 
 def list_documents(db: Session) -> list[dict]:
@@ -32,7 +31,7 @@ def list_documents(db: Session) -> list[dict]:
 
 def process_document(db: Session, document: Document) -> None:
     try:
-        data = Path(document.storage_path).read_bytes()
+        data = read_document(document.storage_path)
         sections = extract_text(document.original_filename or document.title, document.mime_type, data)
         chunks = chunk_sections(sections)
         for existing in list(document.chunks):

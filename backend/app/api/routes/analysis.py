@@ -7,7 +7,8 @@ from app.services.prediction_service import predict
 router = APIRouter()
 
 
-@router.post("/", response_model=AnalyzeResponse)
+@router.post("/", response_model=AnalyzeResponse, include_in_schema=False)
+@router.post("", response_model=AnalyzeResponse)
 def analyze(req: AnalyzeRequest):
     try:
         return predict(req.model, req.answer, req.evidence, req.question or "")

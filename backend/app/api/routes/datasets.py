@@ -5,7 +5,8 @@ from app.data.loader import load_all_datasets
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("/", include_in_schema=False)
+@router.get("")
 def list_datasets():
     records = load_all_datasets()
     by_source: dict[str, int] = {}

@@ -9,7 +9,8 @@ from app.db.models import EvidenceConflict, Document
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("/", include_in_schema=False)
+@router.get("")
 def list_conflicts(db: Session = Depends(get_db)):
     conflicts = db.execute(select(EvidenceConflict).order_by(EvidenceConflict.detected_at.desc())).scalars().all()
     return {"conflicts": [{

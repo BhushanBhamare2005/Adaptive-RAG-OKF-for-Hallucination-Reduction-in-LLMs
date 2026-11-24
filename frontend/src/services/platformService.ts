@@ -6,7 +6,7 @@ export async function getOverview() {
 }
 
 export async function getDocuments() {
-  const { data } = await api.get('/documents/');
+  const { data } = await api.get('/documents');
   return data;
 }
 
@@ -65,7 +65,7 @@ export async function getAEVLRuns() {
 }
 
 export async function getConflicts() {
-  const { data } = await api.get('/conflicts/');
+  const { data } = await api.get('/conflicts');
   return data;
 }
 
@@ -162,6 +162,6 @@ export async function submitFeedback(payload: {
   corrected_answer?: string;
   comment?: string;
 }) {
-  const { data } = await api.post('/feedback/', payload);
+  const { data } = await api.post('/feedback', payload);
   return data;
 }

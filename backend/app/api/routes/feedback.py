@@ -9,7 +9,8 @@ from app.db.models import Feedback, Query
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("/", include_in_schema=False)
+@router.post("")
 def submit_feedback(payload: FeedbackRequest, db: Session = Depends(get_db)):
     query = db.get(Query, payload.query_id)
     if not query:
@@ -28,7 +29,8 @@ def submit_feedback(payload: FeedbackRequest, db: Session = Depends(get_db)):
     return {"status": "saved", "feedback_id": item.id}
 
 
-@router.get("/")
+@router.get("/", include_in_schema=False)
+@router.get("")
 def list_feedback(db: Session = Depends(get_db)):
     items = db.execute(select(Feedback).order_by(Feedback.created_at.desc())).scalars().all()
     return {"feedback": [{

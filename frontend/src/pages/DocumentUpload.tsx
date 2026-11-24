@@ -48,7 +48,7 @@ export default function DocumentUpload() {
     <div className="form-grid">
       <section className="panel upload-panel">
         <div className="panel-header"><div><span className="eyebrow">Local document</span><h2>Upload file</h2></div></div>
-        <label className="drop-zone" htmlFor="document-file"><strong>{file ? file.name : 'Choose a document'}</strong><small>PDF, DOCX, TXT, MD or CSV · 50 MB maximum</small></label>
+        <label className="drop-zone" htmlFor="document-file"><strong>{file ? file.name : 'Choose a document'}</strong><small>PDF, DOCX, TXT, MD or CSV · 4 MB maximum on hosted deployment</small></label>
         <input id="document-file" className="visually-hidden" type="file" accept=".pdf,.docx,.txt,.md,.csv" onChange={(e) => setFile(e.target.files?.[0] || null)} />
         <button className="button primary full" disabled={busy} onClick={upload}>{busy ? 'Processing...' : 'Upload and index'}</button>
       </section>

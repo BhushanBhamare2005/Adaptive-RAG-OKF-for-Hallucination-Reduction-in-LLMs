@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from app.core.config import settings
 from app.db.database import engine
 from app.rag.providers import get_llm_provider
+from app.rag.vector_store import VectorStoreStatus
 
 router = APIRouter()
 
@@ -31,7 +32,7 @@ def ready():
     return {
         "status": "ready" if database_status == "ready" else "degraded",
         "database": database_status,
-        "vector_store": "sqlite_retrieval",
+        "vector_store": VectorStoreStatus.status(),
         "embedding_provider": {
             "status": "ready",
             "provider": "local",

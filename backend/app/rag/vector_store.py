@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
 
 from app.core.config import settings
 
@@ -8,6 +9,12 @@ from app.core.config import settings
 class VectorStoreStatus:
     @staticmethod
     def status() -> dict:
+        if os.getenv("VERCEL") == "1":
+            return {
+                "provider": "postgresql_retrieval",
+                "status": "available",
+                "persist_dir": "managed database",
+            }
         try:
             import chromadb  # noqa: F401
             return {
@@ -24,6 +31,8 @@ class VectorStoreStatus:
 
 
 def get_collection():
+    if os.getenv("VERCEL") == "1":
+        return None
     try:
         import chromadb
 
