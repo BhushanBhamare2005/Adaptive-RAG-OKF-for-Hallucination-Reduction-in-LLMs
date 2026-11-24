@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Data & outputs
+data/processed/*
+!data/processed/.gitkeep
+storage/*
+!storage/.gitkeep
+outputs/figures/*
+outputs/reports/*
+outputs/confusion_matrices/*
+outputs/models/*
+!outputs/figures/.gitkeep
+!outputs/reports/.gitkeep
+!outputs/confusion_matrices/.gitkeep
+!outputs/models/.gitkeep
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
